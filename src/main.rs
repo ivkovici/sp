@@ -1,10 +1,13 @@
+mod db;
+
 extern crate clap;
 extern crate open;
-use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
-use serde::{Deserialize, Serialize};
 use yansi::Paint;
 use clap::{Arg, App, SubCommand};
 use std::fs;
+use std::borrow::Cow;
+use crate::db::Replace;
+use pickledb::{PickleDb};
 
 /*
 
@@ -19,15 +22,13 @@ t:\ ---> /mnt/temp/
 t:\igor\path\sccpre.cat-kim-jung-un-png-913514.png
 /mnt/temp/igor/path/sccpre.cat-kim-jung-un-png-913514.png
 
+./target/debug/sp -f='p:\' -r='/mnt/public/'
+./target/debug/sp -f='t:\' -r='/mnt/temp/'
+./target/debug/sp -o='t:\igor\path\sccpre.cat-kim-jung-un-png-913514.png'
+
 https://github.com/Byron/open-rs
 
 */
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Replace {
-    pub find: String,
-    pub replace: String,
-}
 
 
 fn main() { 
@@ -75,82 +76,31 @@ fn main() {
 
         println!("pair {:?}", pair);
 
-        self::set_replace_pair(pair);
+        db::set_replace_pair(pair);
     }
 
-    let db = self::get_db();
-
-    let rpairs = db.get::<Vec<Replace>>("replace_pairs");
-    let mut replace_pairs;
-
-    if rpairs.is_some() {
-        replace_pairs = rpairs.unwrap();
-        //println!("{:?}", replace_pairs.unwrap());
-    } else {
-        replace_pairs = vec![];
-    }
+    let db = db::get_db();
 
     if let Some(o) = matches.value_of("open") {
-        let mut path = o;
-        
-        for pair in replace_pairs {
-            path = str::replace(&path, &pair.find, &pair.replace);
-        }
-
-        path = str::replace(&path, "\\", "/");
+        let path = self::replace_path_name(o, &db);
 
         if self::path_exists(&path) {
             self::open_file(&path);
         } else {
             println!("{}", Paint::red("Path/file not exists."));
-        }
-
-        println!("Value for config: {}", o);
-        //println!("Value for config: {}", path);
-    }
-}
-
-/** Loads or creates the db */
-pub fn get_db() -> PickleDb {
-    let db;
-    let load_db = PickleDb::load(
-        "sp.db",
-        PickleDbDumpPolicy::DumpUponRequest,
-        SerializationMethod::Json,
-    );
-
-    match load_db {
-        Ok(db_loaded) => db = db_loaded,
-        Err(_) => {
-            db = PickleDb::new(
-                "sp.db",
-                PickleDbDumpPolicy::AutoDump,
-                SerializationMethod::Json,
-            );
-        },
-    }
-
-    db
-}
-
-/** Expands the replace pairs list with new replace pairs */
-pub fn set_replace_pair(pair: Replace) {
-    let mut db = self::get_db();
-    let mut replace_pairs: Vec<Replace>;
-
-    match db.get::<Vec<Replace>>("replace_pairs") {
-        Some(pairs) => {
-            replace_pairs = pairs;
-            replace_pairs.push(pair);
-        },
-        None => {
-            replace_pairs = vec![pair];
+            println!("{}", Paint::red(&path));
         }
     }
-    
-    db.set("replace_pairs", &replace_pairs).unwrap();
-}
 
+    let rpairs = db.get::<Vec<Replace>>("replace_pairs");
+    let replace_pairs;
+
+    if rpairs.is_some() {
+        replace_pairs = rpairs.unwrap();
+
+        println!("{:?}", replace_pairs);
+    }
+}
 
 /** Checks if the path or the file is an existing one */
  pub fn path_exists(path: &str) -> bool {
@@ -165,4 +115,18 @@ pub fn open_file(path: &str) {
         Ok(_) => println!("{}", Paint::green("The path/file was opened.")),
         Err(e) => println!("{}", Paint::red(e)),
     }
+}
+
+/** Replaces the necessary parts in the path */
+fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb) -> Cow<'a, str> {
+    let mut tmp = Cow::from(path);
+
+    if let Some(replace_pairs) = db.get::<Vec<Replace>>("replace_pairs") {        
+        for pair in &*replace_pairs {
+            tmp = tmp.replace(&*pair.find, &*pair.replace).into();
+        }
+    }
+
+    tmp = tmp.replace("\\", "/").into();
+    tmp
 }
