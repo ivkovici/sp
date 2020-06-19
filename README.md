@@ -19,6 +19,11 @@ This cli was made using the Rust programming language, so you will need Rust to 
 
 [INSTALL RUST](https://rustup.rs)
 
+## Installation
+```sh
+$ cargo install sp
+```
+
 ## Usage
 You can check the usage with these commands:
 ```sh

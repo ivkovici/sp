@@ -1,6 +1,6 @@
 [package]
 name = "sp"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Igor <ivkovityigor@gmail.com>"]
 edition = "2018"
 documentation = "https://github.com/ivkovici/sp"
@@ -18,3 +18,4 @@ yansi = "0.5.0"
 pickledb = "0.4.1"
 serde = "1.0.112"
 clipboard-ext = "0.2.0"
+dirs = "2.0.2"

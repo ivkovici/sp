@@ -10,9 +10,13 @@ pub struct Replace {
 
 /** Loads or creates the db */
 pub fn get_db() -> PickleDb {
+    let home = dirs::home_dir().unwrap();
+    let mut path = String::from(home.to_str().unwrap());
+    path.push_str("/sp.db");
+
     let db;
     let load_db = PickleDb::load(
-        "sp.db",
+        &path,
         PickleDbDumpPolicy::DumpUponRequest,
         SerializationMethod::Json,
     );
@@ -21,7 +25,7 @@ pub fn get_db() -> PickleDb {
         Ok(db_loaded) => db = db_loaded,
         Err(_) => {
             db = PickleDb::new(
-                "sp.db",
+                path,
                 PickleDbDumpPolicy::AutoDump,
                 SerializationMethod::Json,
             );

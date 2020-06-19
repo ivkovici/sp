@@ -3,34 +3,11 @@ mod path;
 
 extern crate clap;
 extern crate open;
+extern crate dirs;
 use crate::db::Replace;
 
 use yansi::Paint;
 use clap::{Arg, App};
-
-
-/*
-
-Runing tests:
-./target/debug/sp --open=perkele
-./target/debug/sp -o=perkele
-
-p:\ ---> /mnt/public/
-p:\sanoma.profession\media\layout\e-com\termek-kivalasztasa03.png
-
-t:\ ---> /mnt/temp/
-t:\igor\path\sccpre.cat-kim-jung-un-png-913514.png
-/mnt/temp/igor/path/sccpre.cat-kim-jung-un-png-913514.png
-
-./target/debug/sp -f 'p:\' -r '/mnt/public/'
-./target/debug/sp -f 't:\' -r '/mnt/temp/'
-./target/debug/sp -o 't:\igor\path\sccpre.cat-kim-jung-un-png-913514.png'
-./target/debug/sp -t /mnt/temp/igor/path/sccpre.cat-kim-jung-un-png-913514.png
-
-https://github.com/Byron/open-rs
-
-*/
-
 
 fn main() { 
     let matches = App::new("sp")
@@ -79,7 +56,7 @@ fn main() {
         .help("Lists the existing path replace pairs.")
         .takes_value(false)
     )
-    .get_matches(); 
+    .get_matches();     
 
     let find = matches.value_of("find");
     let replace = matches.value_of("replace");
