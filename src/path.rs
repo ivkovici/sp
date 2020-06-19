@@ -39,34 +39,6 @@ pub fn open(path: &str, db: &PickleDb) {
     }
 }
 
-/** Goes to a given directory TODO */
-pub fn go_to_directory<'a>(directory: &'a str, db: &'a PickleDb) {
-    let translated_dir = self::replace_path_name(directory, db, true);
-
-    if self::is_dir(&*translated_dir) {
-        let dir = Path::new(&*translated_dir);
-
-        match env::set_current_dir(&dir) {
-            Ok(_) => println!("Successfully changed working directory to {}!", Paint::green(dir.display())),
-            Err(e) => println!("{}", Paint::red(e))
-        }
-    } else {
-        println!("{}", Paint::red("It's not a directory."));
-    }
-}
-
-/** Checks if the path is a directory */
-pub fn is_dir(path: &str) -> bool {
-    let mut is_dir = false;
-
-    match fs::metadata(path) {
-        Ok(md) => { is_dir = md.is_dir(); },
-        Err(e) => { println!("{}", Paint::red(e)); }
-    }
-
-    is_dir
-}
-
 /** Checks if the path or the file is an existing one */
  pub fn path_exists(path: &str) -> bool {
     fs::metadata(path).is_ok()
