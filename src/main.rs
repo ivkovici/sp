@@ -1,13 +1,13 @@
 mod db;
+mod path;
 
 extern crate clap;
 extern crate open;
-use yansi::Paint;
-use clap::{Arg, App, SubCommand};
-use std::fs;
-use std::borrow::Cow;
 use crate::db::Replace;
-use pickledb::{PickleDb};
+
+use yansi::Paint;
+use clap::{Arg, App};
+
 
 /*
 
@@ -22,9 +22,10 @@ t:\ ---> /mnt/temp/
 t:\igor\path\sccpre.cat-kim-jung-un-png-913514.png
 /mnt/temp/igor/path/sccpre.cat-kim-jung-un-png-913514.png
 
-./target/debug/sp -f='p:\' -r='/mnt/public/'
-./target/debug/sp -f='t:\' -r='/mnt/temp/'
-./target/debug/sp -o='t:\igor\path\sccpre.cat-kim-jung-un-png-913514.png'
+./target/debug/sp -f 'p:\' -r '/mnt/public/'
+./target/debug/sp -f 't:\' -r '/mnt/temp/'
+./target/debug/sp -o 't:\igor\path\sccpre.cat-kim-jung-un-png-913514.png'
+./target/debug/sp -t /mnt/temp/igor/path/sccpre.cat-kim-jung-un-png-913514.png
 
 https://github.com/Byron/open-rs
 
@@ -57,76 +58,62 @@ fn main() {
         .help("We are replacing the related FIND value in the path with this.")
         .takes_value(true)
     )
+    .arg(Arg::with_name("translate")
+        .short("t")
+        .long("translate")
+        .value_name("TRANSLATE")
+        .help("Translates a given path and copies it to the clipboard.")
+        .takes_value(true)
+    )
+    .arg(Arg::with_name("empty")
+        .short("e")
+        .long("empty")
+        .value_name("EMPTY")
+        .help("Empties the replace pairs.")
+        .takes_value(false)
+    )
+    .arg(Arg::with_name("list")
+        .short("l")
+        .long("list")
+        .value_name("list")
+        .help("Lists the existing path replace pairs.")
+        .takes_value(false)
+    )
     .get_matches(); 
 
     let find = matches.value_of("find");
     let replace = matches.value_of("replace");
 
+    // sets a new replace pair
     if  find.is_some() && replace.is_some() {
-        let f = find.unwrap();
-        let t = replace.unwrap();
-
-        println!("{}", f);
-        println!("{}", t);
-
-        let pair = Replace {
-            find: String::from(f),
-            replace: String::from(t)
-        };
-
-        println!("pair {:?}", pair);
-
-        db::set_replace_pair(pair);
+        db::set_replace_pair(Replace {
+            find: String::from(find.unwrap()),
+            replace: String::from(replace.unwrap())
+        });
     }
 
-    let db = db::get_db();
+    let mut db = db::get_db();
 
+    // opens the file or the path
     if let Some(o) = matches.value_of("open") {
-        let path = self::replace_path_name(o, &db);
-
-        if self::path_exists(&path) {
-            self::open_file(&path);
-        } else {
-            println!("{}", Paint::red("Path/file not exists."));
-            println!("{}", Paint::red(&path));
-        }
+        path::open(o, &db)
     }
 
-    let rpairs = db.get::<Vec<Replace>>("replace_pairs");
-    let replace_pairs;
-
-    if rpairs.is_some() {
-        replace_pairs = rpairs.unwrap();
-
-        println!("{:?}", replace_pairs);
+    // translates the path and copies it to the clipboard
+    if let Some(t) = matches.value_of("translate") {
+        path::translate(t, &db);
     }
-}
 
-/** Checks if the path or the file is an existing one */
- pub fn path_exists(path: &str) -> bool {
-    fs::metadata(path).is_ok()
-}
+    // lists the existing path replace pairs
+    if matches.is_present("list") {
+        path::list(&db);
+    }
 
-/** Opens the path or file. If unable to open it then prints out the error message */
-pub fn open_file(path: &str) {
-    let op_file = open::that(path);
-
-    match op_file {
-        Ok(_) => println!("{}", Paint::green("The path/file was opened.")),
-        Err(e) => println!("{}", Paint::red(e)),
+    // empties the stored replace pairs
+    if matches.is_present("empty") {
+        db.rem("replace_pairs").unwrap();
+        println!("{}", Paint::green("The replace pairs were emptied."));
     }
 }
 
-/** Replaces the necessary parts in the path */
-fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb) -> Cow<'a, str> {
-    let mut tmp = Cow::from(path);
 
-    if let Some(replace_pairs) = db.get::<Vec<Replace>>("replace_pairs") {        
-        for pair in &*replace_pairs {
-            tmp = tmp.replace(&*pair.find, &*pair.replace).into();
-        }
-    }
-
-    tmp = tmp.replace("\\", "/").into();
-    tmp
-}

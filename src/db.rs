@@ -1,7 +1,8 @@
 use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use serde::{Deserialize, Serialize};
+use yansi::Paint;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Replace {
     pub find: String,
     pub replace: String,
@@ -38,12 +39,13 @@ pub fn set_replace_pair(pair: Replace) {
     match db.get::<Vec<Replace>>("replace_pairs") {
         Some(pairs) => {
             replace_pairs = pairs;
-            replace_pairs.push(pair);
+            replace_pairs.push(pair.clone());
         },
         None => {
-            replace_pairs = vec![pair];
+            replace_pairs = vec![pair.clone()];
         }
     }
     
     db.set("replace_pairs", &replace_pairs).unwrap();
+    println!("New replace pair is set: {} => {}", Paint::blue(&*pair.find), Paint::blue(&*pair.replace));
 }
