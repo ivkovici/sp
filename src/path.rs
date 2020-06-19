@@ -1,8 +1,6 @@
 use std::fs;
 use std::borrow::Cow;
 use pickledb::{PickleDb};
-use std::env;
-use std::path::Path;
 use clipboard_ext::prelude::*;
 use clipboard_ext::x11_fork::ClipboardContext;
 use yansi::Paint;
