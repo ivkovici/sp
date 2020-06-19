@@ -3,6 +3,11 @@ name = "sp"
 version = "0.1.0"
 authors = ["Igor <ivkovityigor@gmail.com>"]
 edition = "2018"
+documentation = "https://github.com/ivkovici/sp"
+repository = "https://github.com/ivkovici/sp"
+readme = "README.md"
+description = "This cli opens files from Windows routes and translates Linux routes to Windows routes."
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
