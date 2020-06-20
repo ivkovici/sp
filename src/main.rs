@@ -58,14 +58,11 @@ fn main() {
     )
     .get_matches();     
 
-    let find = matches.value_of("find");
-    let replace = matches.value_of("replace");
-
     // sets a new replace pair
-    if  find.is_some() && replace.is_some() {
+    if  let (Some(find), Some(replace)) = (matches.value_of("find"), matches.value_of("replace")) {
         db::set_replace_pair(Replace {
-            find: String::from(find.unwrap()),
-            replace: String::from(replace.unwrap())
+            find: String::from(find),
+            replace: String::from(replace)
         });
     }
 
