@@ -21,7 +21,7 @@ pub fn list(db: &PickleDb) {
 pub fn translate(path: &str, db: &PickleDb) {
     let path = self::replace_path_name(path, &db, false);
     let mut ctx = ClipboardContext::new().unwrap();
-    ctx.set_contents(String::from(&*path).into()).unwrap();
+    ctx.set_contents(String::from(&*path)).unwrap();
     println!("The translated path is copied to the clipboard: {}", Paint::green(path));
 }
 
@@ -53,17 +53,28 @@ pub fn open_file(path: &str) {
 }
 
 /** Replaces the necessary parts in the path */
-fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb, to_linux: bool) -> Cow<'a, str> {
+fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb, to_open: bool) -> Cow<'a, str> {
     let mut tmp = Cow::from(path);
+    let windows;
 
-    if to_linux {
+    match db.get::<bool>("windows") {
+        Some(win) => windows = win,
+        None => windows = false
+    }
+
+    if to_open {
         if let Some(replace_pairs) = db.get::<Vec<Replace>>("replace_pairs") {        
             for pair in &*replace_pairs {
                 tmp = tmp.replace(&*pair.find, &*pair.replace).into();
             }
         }
+
+        if windows {
+            tmp = tmp.replace("/", "\\").into();
+        } else {
+            tmp = tmp.replace("\\", "/").into();
+        }
     
-        tmp = tmp.replace("\\", "/").into();
     } else {
         if let Some(replace_pairs) = db.get::<Vec<Replace>>("replace_pairs") {        
             for pair in &*replace_pairs {
@@ -71,7 +82,11 @@ fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb, to_linux: bool) -> Cow
             }
         }
     
-        tmp = tmp.replace("/", "\\").into();
+        if windows {
+            tmp = tmp.replace("\\", "/").into();
+        } else {
+            tmp = tmp.replace("/", "\\").into();
+        }
     }
 
     tmp

@@ -14,7 +14,7 @@ pub fn get_db() -> PickleDb {
     let mut path = String::from(home.to_str().unwrap());
     path.push_str("/sp.db");
 
-    let db;
+    let mut db;
     let load_db = PickleDb::load(
         &path,
         PickleDbDumpPolicy::DumpUponRequest,
@@ -29,6 +29,9 @@ pub fn get_db() -> PickleDb {
                 PickleDbDumpPolicy::AutoDump,
                 SerializationMethod::Json,
             );
+
+            let info = os_info::get();
+            db.set("windows", &(info.os_type() == os_info::Type::Windows)).unwrap();
         },
     }
 
