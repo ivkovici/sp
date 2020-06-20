@@ -1,6 +1,7 @@
 use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use serde::{Deserialize, Serialize};
 use yansi::Paint;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Replace {
@@ -10,13 +11,13 @@ pub struct Replace {
 
 /** Loads or creates the db */
 pub fn get_db() -> PickleDb {
-    let home = dirs::home_dir().unwrap();
-    let mut path = String::from(home.to_str().unwrap());
-    path.push_str("/sp.db");
+    let home_path = dirs::home_dir().unwrap();
+    let part_path = Path::new("sp.db");
+    let full_path = home_path.join(part_path);
 
     let mut db;
     let load_db = PickleDb::load(
-        &path,
+        &full_path,
         PickleDbDumpPolicy::DumpUponRequest,
         SerializationMethod::Json,
     );
@@ -25,7 +26,7 @@ pub fn get_db() -> PickleDb {
         Ok(db_loaded) => db = db_loaded,
         Err(_) => {
             db = PickleDb::new(
-                path,
+                full_path,
                 PickleDbDumpPolicy::AutoDump,
                 SerializationMethod::Json,
             );

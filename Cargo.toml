@@ -1,6 +1,6 @@
 [package]
 name = "sp"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Igor <ivkovityigor@gmail.com>"]
 edition = "2018"
 documentation = "https://github.com/ivkovici/sp"
