@@ -53,7 +53,7 @@ pub fn open_file(path: &str) {
 }
 
 /** Replaces the necessary parts in the path */
-fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb, to_open: bool) -> Cow<'a, str> {
+fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb, to_system: bool) -> Cow<'a, str> {
     let mut tmp = Cow::from(path);
     let windows;
 
@@ -62,7 +62,7 @@ fn replace_path_name<'a>(path: &'a str, db: &'a PickleDb, to_open: bool) -> Cow<
         None => windows = false
     }
 
-    if to_open {
+    if to_system {
         if let Some(replace_pairs) = db.get::<Vec<Replace>>("replace_pairs") {        
             for pair in &*replace_pairs {
                 tmp = tmp.replace(&*pair.find, &*pair.replace).into();

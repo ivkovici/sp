@@ -12,7 +12,7 @@ If you are using linux opening these paths and linking them is a headache becaus
 ```
 
 This cli opens files from Windows routes and translates Linux routes to Windows routes.
-It should work for Windows users with Linux routes too but I never tried.
+It should work for Windows users with Linux routes, but I never tried.
 
 ## Dependencies
 
