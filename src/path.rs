@@ -1,10 +1,10 @@
-use std::fs;
-use std::borrow::Cow;
-use pickledb::{PickleDb};
-use clipboard_ext::prelude::*;
-use clipboard_ext::x11_fork::ClipboardContext;
-use yansi::Paint;
 use crate::db::Replace;
+use copypasta_ext::prelude::*;
+use copypasta_ext::x11_fork::ClipboardContext;
+use pickledb::PickleDb;
+use std::borrow::Cow;
+use std::fs;
+use yansi::Paint;
 
 /** Lists the replace pairs */
 pub fn list(db: &PickleDb) {
