@@ -6,13 +6,13 @@ files like this:
 ```
  t:\igor\path\sccpre.cat-kim-jung-un-png-913514.png
  ```
-If you are using linux opening these paths and linking them is a headache because we have routes like this:
+If you are using linux opening these paths and linking them is a headache because we have paths like this:
 ```
 /mnt/temp/igor/path/sccpre.cat-kim-jung-un-png-913514.png
 ```
 
-This cli opens files from Windows routes and translates Linux routes to Windows routes.
-It should work for Windows users with Linux routes, but I never tried.
+This cli opens files from Windows paths and translates Linux paths to Windows paths.
+It should work for Windows users with Linux paths, but I never tried.
 
 ## Dependencies
 
